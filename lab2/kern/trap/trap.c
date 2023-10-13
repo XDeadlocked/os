@@ -8,7 +8,7 @@
 #include <riscv.h>
 #include <stdio.h>
 #include <trap.h>
-
+#include <sbi.h>
 #define TICK_NUM 100
 
 static void print_ticks() {
@@ -102,6 +102,8 @@ void print_regs(struct pushregs *gpr) {
 
 void interrupt_handler(struct trapframe *tf) {
     intptr_t cause = (tf->cause << 1) >> 1;
+    static size_t tick_s=0;//计数器
+    static size_t num1=0;//打印次数
     switch (cause) {
         case IRQ_U_SOFT:
             cprintf("User software interrupt\n");
@@ -126,8 +128,10 @@ void interrupt_handler(struct trapframe *tf) {
             // cprintf("Supervisor timer interrupt\n");
             // clear_csr(sip, SIP_STIP);
             clock_set_next_event();
-            if (++ticks % TICK_NUM == 0) {
-                print_ticks();
+            ticks++;
+
+            if(ticks % TICK_NUM == 0){
+                print_ticks();//当计数器加到100的时候，我们会输出一个`100ticks`表示我们触发了100次时钟中断
             }
             break;
         case IRQ_H_TIMER:
