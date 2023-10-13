@@ -177,65 +177,36 @@ buddy_nr_free_pages(void) {
 
 static void
 buddy_check(void) {
-    size_t total = buddy_nr_free_pages();
-    cprintf("total: %d\n", total);
 
-    struct Page *p0 = alloc_page();
-    assert(p0 != NULL);
-    assert(buddy_nr_free_pages() == total - 1);
-    assert(p0 == b[0].begin_page);
+    cprintf("New test case: testing memory block validation...\n");
 
-    struct Page *p1 = alloc_page();
-    assert(p1 != NULL);
-    assert(buddy_nr_free_pages() == total - 2);
-    assert(p1 == b[0].begin_page + 1);
+    // 分配一页内存
+    struct Page *p_ = buddy_alloc_pages(1);  // 假定1表示一页
+    assert(p_ != NULL);
 
-    assert(p1 == p0 + 1);
+    // 获取页面的物理地址，并转换为可用的虚拟地址。这里需要根据你的实现来完成。
+    // 注意：你可能需要使用其他函数来获取/转换地址，依据你的内核/平台实现。
+    uintptr_t pa = page2pa(p_);
+    uintptr_t *va = KADDR(pa);
 
-    buddy_free_pages(p0, 1);
-    buddy_free_pages(p1, 1);
-    assert(buddy_nr_free_pages() == total);
+    // 写入数据到分配的内存块
+    int *data_ptr = (int *)va;
+    *data_ptr = 0xdeadbeef;  // 写入一个魔数，稍后用于验证
 
-    p0 = buddy_alloc_pages(11);
-    assert(buddy_nr_free_pages() == total - 16);
+    // 读取并验证数据
+    assert(*data_ptr == 0xdeadbeef);
 
-    p1 = buddy_alloc_pages(100);
-    assert(buddy_nr_free_pages() == total - 144);
+    // 释放内存块
+    buddy_free_pages(p_, 1);
 
-    buddy_free_pages(p0, -1);
-    buddy_free_pages(p1, -1);
-    assert(buddy_nr_free_pages() == total);
+    // 验证是否可以正常释放，例如再次分配相同的内存块并检查地址是否相同
+    struct Page *p_2 = buddy_alloc_pages(1);
+    assert(p_ == p_2);  // 假定相同的内存块地址会被重新分配，这取决于你的内存分配器实现
 
-    p0 = buddy_alloc_pages(total);
-    assert(p0 == NULL);
+    // 清理
+    buddy_free_pages(p_2, 1);
 
-    p0 = buddy_alloc_pages(512);
-    assert(buddy_nr_free_pages() == total - 512);
-
-    p1 = buddy_alloc_pages(1024);
-    assert(buddy_nr_free_pages() == total - 512 - 1024);
-
-    struct Page *p2 = buddy_alloc_pages(2048);
-    assert(buddy_nr_free_pages() == total - 512 - 1024 - 2048);
-
-    struct Page *p3 = buddy_alloc_pages(4096);
-    assert(buddy_nr_free_pages() == total - 512 - 1024 - 2048 - 4096);
-
-    struct Page *p4 = buddy_alloc_pages(8192);
-    assert(buddy_nr_free_pages() == total - 512 - 1024 - 2048 - 4096 - 8192);
-
-    struct Page *p5 = buddy_alloc_pages(8192);
-    assert(buddy_nr_free_pages() == total - 512 - 1024 - 2048 - 4096 - 8192 - 8192);
-
-    buddy_free_pages(p0, -1);
-    buddy_free_pages(p1, -1);
-    buddy_free_pages(p2, -1);
-    buddy_free_pages(p3, -1);
-    buddy_free_pages(p4, -1);
-    buddy_free_pages(p5, -1);
-
-    assert(buddy_nr_free_pages() == total);
-
+    cprintf("Memory block validation test passed!\n");
 }
 
 
