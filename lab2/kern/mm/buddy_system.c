@@ -1,7 +1,6 @@
 #include <pmm.h>
 #include <buddy_system.h>
 
-
 struct buddy {
     size_t size;
     uintptr_t *longest;

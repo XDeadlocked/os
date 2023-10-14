@@ -16,4 +16,5 @@ extern const struct pmm_manager buddy_pmm_manager;
 #define IS_POWER_OF_2(x) (!((x)&((x)-1)))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+
 #endif /* ! __KERN_MM_BEST_FIT_PMM_H__ */
