@@ -17,4 +17,19 @@ extern const struct pmm_manager buddy_pmm_manager;
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern const struct pmm_manager slub_pmm_manager;
+
 #endif /* ! __KERN_MM_BEST_FIT_PMM_H__ */

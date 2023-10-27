@@ -74,9 +74,12 @@ buddy_init_memmap(struct Page *base, size_t n) {
     }
 }
 
-static struct Page *
-buddy_alloc_pages(size_t n) {
+// 定义一个函数用于在 buddy system 中分配页面
+static struct Page *buddy_alloc_pages(size_t n) {
+    // 确保请求的页面数量大于 0
     assert(n > 0);
+
+    // 如果 n 不是 2 的幂，将其调整为下一个最接近的 2 的幂
     if (!IS_POWER_OF_2(n))
         n = next_power_of_2(n);
 
@@ -85,6 +88,8 @@ buddy_alloc_pages(size_t n) {
     size_t offset = 0;
 
     struct buddy *buddy = NULL;
+
+    // 遍历所有的 buddy，找到一个可以满足页面请求的 buddy
     for (int i = 0; i < id_; i++) {
         if (b[i].longest[id] >= n) {
             buddy = &b[i];
@@ -92,48 +97,62 @@ buddy_alloc_pages(size_t n) {
         }
     }
 
+    // 如果没有找到合适的 buddy，则返回 NULL，表示分配失败
     if (!buddy) {
         return NULL;
     }
 
+    // 在 buddy 的管理树中查找一个大小适中的块来分配
     for (sn = buddy->size; sn != n; sn /= 2) {
+        // 检查左子节点是否满足大小需求
         if (buddy->longest[LEFT_LEAF(id)] >= n)
             id = LEFT_LEAF(id);
+        // 否则检查右子节点
         else
             id = RIGHT_LEAF(id);
     }
 
+    // 将找到的块标记为已用
     buddy->longest[id] = 0;
+
+    // 计算该块在 buddy 的页面范围内的偏移量
     offset = (id + 1) * sn - buddy->size;
 
+    // 向上更新树的状态，确保父节点表示它的两个子节点中较大的空闲块
     while (id) {
         id = PARENT(id);
         buddy->longest[id] = MAX(buddy->longest[LEFT_LEAF(id)], buddy->longest[RIGHT_LEAF(id)]);
     }
 
+    // 减少 buddy 的当前空闲页面数
     buddy->curr_free -= n;
 
+    // 返回分配的页面的起始地址
     return buddy->begin_page + offset;
 }
+
 
 
 static void
 buddy_free_pages(struct Page *base, size_t n) {
     struct buddy *buddy = NULL;
-
+    /*
+    哪一个 buddy 区域包含了给定的 base 页面
+    */
     for (int i = 0; i < id_; i++) {
         struct buddy *t = &b[i];
         if (base >= t->begin_page && base < t->begin_page + t->size) {
             buddy = t;
         }
     }
-
+    //
     if (!buddy) return;
 
     unsigned sn, id = 0;
     unsigned left_longest, right_longest;
     unsigned offset = base - buddy->begin_page;
 
+    //确定页面在 buddy 中的位置，并设置它为已经释放：
     assert(offset >= 0 && offset < buddy->size);
 
     sn = 1;
@@ -147,6 +166,11 @@ buddy_free_pages(struct Page *base, size_t n) {
 
     buddy->longest[id] = sn;
     buddy->curr_free += sn;
+
+    /*
+    sn 代表当前考虑的大小，而 id 代表当前考虑的节点在 buddy 管理数组中的索引。此循环查找第一个表示未被使用的节点。
+    释放完成后，代码会尝试合并相邻的、大小相同的空闲块：
+    */
 
     while (id) {
         id = PARENT(id);
@@ -212,6 +236,42 @@ buddy_check(void) {
 
 const struct pmm_manager buddy_pmm_manager = {
         .name = "buddy_pmm_manager",
+        .init = buddy_init,
+        .init_memmap = buddy_init_memmap,
+        .alloc_pages = buddy_alloc_pages,
+        .free_pages = buddy_free_pages,
+        .nr_free_pages = buddy_nr_free_pages,
+        .check = buddy_check,
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const struct pmm_manager slub_pmm_manager = {
+        .name = "slub_pmm_manager",
         .init = buddy_init,
         .init_memmap = buddy_init_memmap,
         .alloc_pages = buddy_alloc_pages,

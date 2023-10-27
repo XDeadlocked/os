@@ -120,6 +120,7 @@ _fifo_check_swap(void) {
 static int
 _fifo_init(void)
 {
+    cprintf("activate _fifo_init.\n\n");
     return 0;
 }
 

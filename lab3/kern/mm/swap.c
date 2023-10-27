@@ -124,7 +124,7 @@ swap_in(struct mm_struct *mm, uintptr_t addr, struct Page **ptr_result)
      assert(result!=NULL);
 
      pte_t *ptep = get_pte(mm->pgdir, addr, 0);
-     // cprintf("SWAP: load ptep %x swap entry %d to vaddr 0x%08x, page %x, No %d\n", ptep, (*ptep)>>8, addr, result, (result-pages));
+     cprintf("SWAP: load ptep %x swap entry %d to vaddr 0x%08x, page %x, No %d\n", ptep, (*ptep)>>8, addr, result, (result-pages));
     
      int r;
      if ((r = swapfs_read((*ptep), result)) != 0)
@@ -141,10 +141,17 @@ swap_in(struct mm_struct *mm, uintptr_t addr, struct Page **ptr_result)
 static inline void
 check_content_set(void)
 {
+     cprintf("<---------------------------check_content_set !!!\n");
+     cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
      *(unsigned char *)0x1000 = 0x0a;
+     cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
      assert(pgfault_num==1);
+     cprintf("assert(pgfault_num==1)\n");
+     cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
      *(unsigned char *)0x1010 = 0x0a;
+     cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
      assert(pgfault_num==1);
+     cprintf("assert(pgfault_num==1)\n");
      *(unsigned char *)0x2000 = 0x0b;
      assert(pgfault_num==2);
      *(unsigned char *)0x2010 = 0x0b;
@@ -157,6 +164,7 @@ check_content_set(void)
      assert(pgfault_num==4);
      *(unsigned char *)0x4010 = 0x0d;
      assert(pgfault_num==4);
+     cprintf("<---------------------------ccheck_content_set !!!\n");
 }
 
 static inline int
@@ -245,7 +253,7 @@ check_swap(void)
      for (i= 0;i<CHECK_VALID_PHY_PAGE_NUM;i++) {
          check_ptep[i]=0;
          check_ptep[i] = get_pte(pgdir, (i+1)*0x1000, 0);
-         //cprintf("i %d, check_ptep addr %x, value %x\n", i, check_ptep[i], *check_ptep[i]);
+         cprintf("i %d, check_ptep addr %x, value %x\n", i, check_ptep[i], *check_ptep[i]);
          assert(check_ptep[i] != NULL);
          assert(pte2page(*check_ptep[i]) == check_rp[i]);
          assert((*check_ptep[i] & PTE_V));          

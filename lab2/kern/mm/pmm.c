@@ -34,7 +34,8 @@ const struct pmm_manager *pmm_manager;
 
 static void check_alloc_page(void);
 
-// init_pmm_manager - initialize a pmm_manager instance
+// init_pmm_manager - initialize a pmm_manager instan
+
 static void init_pmm_manager(void) {
     pmm_manager = &slub_pmm_manager;
     cprintf("memory management: %s\n", pmm_manager->name);

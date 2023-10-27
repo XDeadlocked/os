@@ -6,7 +6,7 @@
 
 #define CACHE_NAMELEN 16
 
-extern const struct pmm_manager slub_pmm_manager;
+extern const struct pmm_manager s_pmm_manager;
 
 typedef struct kmem_cache_t{
 	list_entry_t slubs_full;
