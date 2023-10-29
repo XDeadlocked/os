@@ -40,7 +40,7 @@ _clock_init_mm(struct mm_struct *mm)
      //cprintf(" mm->sm_priv %x in fifo_init_mm\n",mm->sm_priv);
      list_init(&pra_list_head);
      curr_ptr = &pra_list_head;
-     cprintf("curr_ptr 0xffffffff%x\n", curr_ptr);
+     //cprintf("curr_ptr 0xffffffff%x\n", curr_ptr);
      mm->sm_priv = &pra_list_head;
      return 0;
 }
@@ -50,6 +50,7 @@ _clock_init_mm(struct mm_struct *mm)
 static int
 _clock_map_swappable(struct mm_struct *mm, uintptr_t addr, struct Page *page, int swap_in)
 {
+    //cprintf("swap_in:%d\n",swap_in);
     list_entry_t *entry=&(page->pra_page_link);
  
     assert(entry != NULL && curr_ptr != NULL);
@@ -61,8 +62,8 @@ _clock_map_swappable(struct mm_struct *mm, uintptr_t addr, struct Page *page, in
     
     list_entry_t *head=(list_entry_t*) mm->sm_priv;
     //list_entry_t *entry=&(page->pra_page_link);
-    curr_ptr = entry;
-    cprintf("curr_ptr 0xffffffff%x\n", curr_ptr);
+    //curr_ptr = entry;
+    
     assert(entry != NULL && head != NULL);
     list_add_before(head, entry);
     page->visited = 1;
@@ -81,8 +82,6 @@ _clock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tic
      /* Select the victim */
      //(1)  unlink the  earliest arrival page in front of pra_list_head qeueue
      //(2)  set the addr of addr of this page to ptr_page
-    list_entry_t *index = list_next(curr_ptr);
-    int i=0;
     while (1) {
         /*LAB3 EXERCISE 4: YOUR CODE*/ 
         // 编写代码
@@ -90,33 +89,24 @@ _clock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tic
         // 获取当前页面对应的Page结构指针
         // 如果当前页面未被访问，则将该页面从页面链表中删除，并将该页面指针赋值给ptr_page作为换出页面
         // 如果当前页面已被访问，则将visited标志置为0，表示该页面已被重新访问
-        if(index == &pra_list_head) {
-            index = list_next(index);
-            continue;
+        curr_ptr = list_next(curr_ptr);
+        if(curr_ptr == head) {
+            curr_ptr = list_next(curr_ptr);
+            if(curr_ptr == head) {
+                *ptr_page = NULL;
+                break;
+            }
         }
-        struct Page *page = le2page(index, pra_page_link);
-        pte_t* pte = get_pte(mm->pgdir, (uintptr_t)page->pra_vaddr, 0);
-        if(page->visited == 0) {
-            // 返回被置换出的page
+        struct Page* page = le2page(curr_ptr, pra_page_link);
+        if(page->visited==0) {
             *ptr_page = page;
-            // 调整 current
-            curr_ptr = list_next(index);
-            cprintf("curr_ptr 0xffffffff%x\n", curr_ptr);
-            // 将对应的pra_page_link从链表中删除
-            list_del(index);
-            uintptr_t v=page->pra_vaddr;
-
-            cprintf("swap_out: i %d, store page in vaddr 0x%x to disk swap entry %d\n",i,  (*ptr_page)->pra_vaddr, page->pra_vaddr/PGSIZE+1);
-            i++;
+            list_del(curr_ptr);
+            cprintf("curr_ptr %p\n",curr_ptr);
             break;
         }
-        else{
-            cprintf("curr_ptr 0xffffffff%x\n", curr_ptr);
+        else {
             page->visited = 0;
-            index = list_next(index);
         }
-
-
     }
     return 0;
 }
@@ -156,12 +146,19 @@ _clock_check_swap(void) {
     assert(pgfault_num==6);
     ++ score; cprintf("grading %d/%d points", score, totalscore);
 #else 
+    //cprintf("write Virt Page c in fifo_check_swap\n");
     *(unsigned char *)0x3000 = 0x0c;
     assert(pgfault_num==4);
+
+    //cprintf("write Virt Page a in fifo_check_swap\n");
     *(unsigned char *)0x1000 = 0x0a;
     assert(pgfault_num==4);
+
+    //cprintf("write Virt Page d in fifo_check_swap\n");
     *(unsigned char *)0x4000 = 0x0d;
     assert(pgfault_num==4);
+
+    //cprintf("write Virt Page b in fifo_check_swap\n");
     *(unsigned char *)0x2000 = 0x0b;
     assert(pgfault_num==4);
     *(unsigned char *)0x5000 = 0x0e;

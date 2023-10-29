@@ -2,6 +2,7 @@
 #include <swapfs.h>
 #include <swap_fifo.h>
 #include <swap_clock.h>
+#include <swap_lru.h>
 #include <stdio.h>
 #include <string.h>
 #include <memlayout.h>
@@ -39,7 +40,7 @@ swap_init(void)
         panic("bad max_swap_offset %08x.\n", max_swap_offset);
      }
 
-     sm = &swap_manager_clock;//use first in first out Page Replacement Algorithm
+     sm = &swap_manager_lru;//use first in first out Page Replacement Algorithm
      int r = sm->init();
      
      if (r == 0)
@@ -95,7 +96,7 @@ swap_out(struct mm_struct *mm, int n, int in_tick)
           }          
           //assert(!PageReserved(page));
 
-          //cprintf("SWAP: choose victim page 0x%08x\n", page);
+          cprintf("SWAP: choose victim page 0x%08x\n", page);
           
           v=page->pra_vaddr; 
           pte_t *ptep = get_pte(mm->pgdir, v, 0);
@@ -141,17 +142,17 @@ swap_in(struct mm_struct *mm, uintptr_t addr, struct Page **ptr_result)
 static inline void
 check_content_set(void)
 {
-     cprintf("<---------------------------check_content_set !!!\n");
-     cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
+     //cprintf("<---------------------------check_content_set !!!\n");
+     //cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
      *(unsigned char *)0x1000 = 0x0a;
-     cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
+     //cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
      assert(pgfault_num==1);
-     cprintf("assert(pgfault_num==1)\n");
-     cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
+     //cprintf("assert(pgfault_num==1)\n");
+     //cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
      *(unsigned char *)0x1010 = 0x0a;
-     cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
+     //cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
      assert(pgfault_num==1);
-     cprintf("assert(pgfault_num==1)\n");
+     //cprintf("assert(pgfault_num==1)\n");
      *(unsigned char *)0x2000 = 0x0b;
      assert(pgfault_num==2);
      *(unsigned char *)0x2010 = 0x0b;
@@ -164,7 +165,7 @@ check_content_set(void)
      assert(pgfault_num==4);
      *(unsigned char *)0x4010 = 0x0d;
      assert(pgfault_num==4);
-     cprintf("<---------------------------ccheck_content_set !!!\n");
+     //cprintf("<---------------------------ccheck_content_set !!!\n");
 }
 
 static inline int
@@ -253,7 +254,7 @@ check_swap(void)
      for (i= 0;i<CHECK_VALID_PHY_PAGE_NUM;i++) {
          check_ptep[i]=0;
          check_ptep[i] = get_pte(pgdir, (i+1)*0x1000, 0);
-         cprintf("i %d, check_ptep addr %x, value %x\n", i, check_ptep[i], *check_ptep[i]);
+         //cprintf("i %d, check_ptep addr %x, value %x\n", i, check_ptep[i], *check_ptep[i]);
          assert(check_ptep[i] != NULL);
          assert(pte2page(*check_ptep[i]) == check_rp[i]);
          assert((*check_ptep[i] & PTE_V));          
