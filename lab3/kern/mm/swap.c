@@ -40,7 +40,7 @@ swap_init(void)
         panic("bad max_swap_offset %08x.\n", max_swap_offset);
      }
 
-     sm = &swap_manager_lru;//use first in first out Page Replacement Algorithm
+     sm = &swap_manager_clock;//use first in first out Page Replacement Algorithm
      int r = sm->init();
      
      if (r == 0)
@@ -96,7 +96,7 @@ swap_out(struct mm_struct *mm, int n, int in_tick)
           }          
           //assert(!PageReserved(page));
 
-          cprintf("SWAP: choose victim page 0x%08x\n", page);
+          //cprintf("SWAP: choose victim page 0x%08x\n", page);
           
           v=page->pra_vaddr; 
           pte_t *ptep = get_pte(mm->pgdir, v, 0);
@@ -121,7 +121,7 @@ swap_out(struct mm_struct *mm, int n, int in_tick)
 int
 swap_in(struct mm_struct *mm, uintptr_t addr, struct Page **ptr_result)
 {
-     struct Page *result = alloc_page();
+     struct Page *result = alloc_page();// 
      assert(result!=NULL);
 
      pte_t *ptep = get_pte(mm->pgdir, addr, 0);
@@ -137,35 +137,71 @@ swap_in(struct mm_struct *mm, uintptr_t addr, struct Page **ptr_result)
      return 0;
 }
 
+//模拟硬件的lru计数器
+void lru_update(int addr){
+    extern struct mm_struct *check_mm_struct;
+    struct Page* page2 = get_page(check_mm_struct->pgdir, addr, NULL);
+    if(check_mm_struct!=NULL){
+        list_entry_t *head=(list_entry_t*) check_mm_struct->sm_priv;
+        assert(head != NULL);
+        list_entry_t *le = head->next;
+        // 遍历mm的链表，visited加1,若是刚刚访问的addr，visited改为0
+        while (le!=head) {
+            struct Page* page = le2page(le,pra_page_link);
+            if(page!=page2) page->visited++;
+            else page->visited =0;
+            le = le->next;
+        }
+        return;
+    }
+    return;
+}
 
+//模拟硬件的访存接口
+void lru_write_memory(int addr, int value){
+    *(unsigned char *)addr = value;
+    lru_update(addr);
+}
 
 static inline void
 check_content_set(void)
 {
-     //cprintf("<---------------------------check_content_set !!!\n");
-     //cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
-     *(unsigned char *)0x1000 = 0x0a;
-     //cprintf("*(unsigned char *)0x1000 = 0x0a;\n");
-     assert(pgfault_num==1);
-     //cprintf("assert(pgfault_num==1)\n");
-     //cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
-     *(unsigned char *)0x1010 = 0x0a;
-     //cprintf("*(unsigned char *)0x1010 = 0x0a;\n");
-     assert(pgfault_num==1);
-     //cprintf("assert(pgfault_num==1)\n");
-     *(unsigned char *)0x2000 = 0x0b;
-     assert(pgfault_num==2);
-     *(unsigned char *)0x2010 = 0x0b;
-     assert(pgfault_num==2);
-     *(unsigned char *)0x3000 = 0x0c;
-     assert(pgfault_num==3);
-     *(unsigned char *)0x3010 = 0x0c;
-     assert(pgfault_num==3);
-     *(unsigned char *)0x4000 = 0x0d;
-     assert(pgfault_num==4);
-     *(unsigned char *)0x4010 = 0x0d;
-     assert(pgfault_num==4);
-     //cprintf("<---------------------------ccheck_content_set !!!\n");
+     if (sm == &swap_manager_lru){
+          lru_write_memory(0x1000 , 0x0a);
+          assert(pgfault_num==1);
+          lru_write_memory(0x1010 , 0x0a);
+          assert(pgfault_num==1);
+          lru_write_memory(0x2000 , 0x0b);
+          assert(pgfault_num==2);
+          lru_write_memory(0x2010 , 0x0b);
+          assert(pgfault_num==2);
+          lru_write_memory(0x3000 , 0x0c);
+          assert(pgfault_num==3);
+          lru_write_memory(0x3010 , 0x0c);
+          assert(pgfault_num==3);
+          lru_write_memory(0x4000 , 0x0d);
+          assert(pgfault_num==4);
+          lru_write_memory(0x4010 , 0x0d);
+          assert(pgfault_num==4);
+     }
+     else{
+          *(unsigned char *)0x1000 = 0x0a;
+          assert(pgfault_num==1);
+          *(unsigned char *)0x1010 = 0x0a;
+          assert(pgfault_num==1);
+          *(unsigned char *)0x2000 = 0x0b;
+          assert(pgfault_num==2);
+          *(unsigned char *)0x2010 = 0x0b;
+          assert(pgfault_num==2);
+          *(unsigned char *)0x3000 = 0x0c;
+          assert(pgfault_num==3);
+          *(unsigned char *)0x3010 = 0x0c;
+          assert(pgfault_num==3);
+          *(unsigned char *)0x4000 = 0x0d;
+          assert(pgfault_num==4);
+          *(unsigned char *)0x4010 = 0x0d;
+          assert(pgfault_num==4);
+     }
 }
 
 static inline int
@@ -250,7 +286,7 @@ check_swap(void)
      assert( nr_free == 0);         
      for(i = 0; i<MAX_SEQ_NO ; i++) 
          swap_out_seq_no[i]=swap_in_seq_no[i]=-1;
-     
+
      for (i= 0;i<CHECK_VALID_PHY_PAGE_NUM;i++) {
          check_ptep[i]=0;
          check_ptep[i] = get_pte(pgdir, (i+1)*0x1000, 0);

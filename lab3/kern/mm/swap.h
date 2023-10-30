@@ -59,6 +59,11 @@ int swap_set_unswappable(struct mm_struct *mm, uintptr_t addr);
 int swap_out(struct mm_struct *mm, int n, int in_tick);
 int swap_in(struct mm_struct *mm, uintptr_t addr, struct Page **ptr_result);
 
+//模拟硬件支持
+void lru_update(int addr);
+//模拟硬件的访存接口
+void lru_write_memory(int addr, int value);
+
 //#define MEMBER_OFFSET(m,t) ((int)(&((t *)0)->m))
 //#define FROM_MEMBER(m,t,a) ((t *)((char *)(a) - MEMBER_OFFSET(m,t)))
 
