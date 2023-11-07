@@ -21,7 +21,6 @@ size_t npage = 0;
 uint_t va_pa_offset;
 // memory starts at 0x80000000 in RISC-V
 const size_t nbase = DRAM_BASE / PGSIZE;
-
 // virtual address of boot-time page directory
 pde_t *boot_pgdir = NULL;
 // physical address of boot-time page directory
@@ -205,6 +204,7 @@ void pmm_init(void) {
 
     kmalloc_init();
 }
+
 
 // get_pte - get pte and return the kernel virtual address of this pte for la
 //        - if the PT contians this pte didn't exist, alloc a page for PT

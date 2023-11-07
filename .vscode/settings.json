@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "chrono": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/home/xc/Desktop/os/riscv64-ucore-labcodes/lab8"
 }

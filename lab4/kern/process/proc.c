@@ -102,8 +102,19 @@ alloc_proc(void) {
      *       uint32_t flags;                             // Process flag
      *       char name[PROC_NAME_LEN + 1];               // Process name
      */
-
-
+        proc->state = PROC_UNINIT;
+        proc->pid = -1;
+        proc->runs = 0;
+        proc->kstack = 0;
+        proc->need_resched = 0;
+        proc->parent = NULL;
+        proc->mm = NULL;
+        proc->mm = NULL; // 进程所用的虚拟内存
+        memset(&(proc->context), 0, sizeof(struct context)); // 进程的上下文
+        proc->tf = NULL; // 中断帧指针
+        proc->cr3 = boot_cr3; // 页目录表地址 设为 内核页目录表基址
+        proc->flags = 0; // 标志位
+        memset(&(proc->name), 0, PROC_NAME_LEN); // 进程名
     }
     return proc;
 }
@@ -172,7 +183,17 @@ proc_run(struct proc_struct *proc) {
         *   lcr3():                   Modify the value of CR3 register
         *   switch_to():              Context switching between two processes
         */
-       
+        bool intr_flag;
+        struct proc_struct *prev = current, *next = proc;
+        local_intr_save(intr_flag); // 关闭中断
+        {
+            current = proc; // 将当前进程换为 要切换到的进程
+            // 设置任务状态段tss中的特权级0下的 esp0 指针为 next 内核线程 的内核栈的栈顶
+            //load_esp0(next->kstack + KSTACKSIZE);
+            lcr3(next->cr3); // 重新加载 cr3 寄存器(页目录表基址) 进行进程间的页表切换
+            switch_to(&(prev->context), &(next->context)); // 调用 switch_to 进行上下文的保存与切换
+        }
+        local_intr_restore(intr_flag);
     }
 }
 
@@ -298,6 +319,19 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     //    5. insert proc_struct into hash_list && proc_list
     //    6. call wakeup_proc to make the new child process RUNNABLE
     //    7. set ret vaule using child proc's pid
+    if ((proc = alloc_proc()) == NULL)
+    	goto fork_out;    
+    if (setup_kstack(proc) != 0)
+    	goto bad_fork_cleanup_proc;
+    if (copy_mm(clone_flags, proc) != 0)
+    	goto bad_fork_cleanup_kstack;    
+    copy_thread(proc, stack, tf);
+    proc->pid = get_pid();
+    nr_process++;
+    hash_proc(proc);
+    list_add_before(&proc_list, &proc->list_link);
+    wakeup_proc(proc);
+    ret = proc->pid;
 
     
 
