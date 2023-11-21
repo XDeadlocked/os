@@ -77,9 +77,9 @@ struct proc_struct *current = NULL;
 
 static int nr_process = 0;
 
-void kernel_thread_entry(void);
-void forkrets(struct trapframe *tf);
-void switch_to(struct context *from, struct context *to);
+void kernel_thread_entry(void);// 内核线程入口函数
+void forkrets(struct trapframe *tf);// 从内核线程返回用户态的函数
+void switch_to(struct context *from, struct context *to);// 进程上下文切换函数
 
 // alloc_proc - alloc a proc_struct and init all fields of proc_struct
 static struct proc_struct *
@@ -137,10 +137,10 @@ get_proc_name(struct proc_struct *proc) {
 // get_pid - alloc a unique pid for process
 static int
 get_pid(void) {
-    static_assert(MAX_PID > MAX_PROCESS);
-    struct proc_struct *proc;
-    list_entry_t *list = &proc_list, *le;
-    static int next_safe = MAX_PID, last_pid = MAX_PID;
+    static_assert(MAX_PID > MAX_PROCESS);// MAX_PID > MAX_PROCESS
+    struct proc_struct *proc;// 进程控制块
+    list_entry_t *list = &proc_list, *le;// 进程链表
+    static int next_safe = MAX_PID, last_pid = MAX_PID;// next_safe: 下一个安全的pid值, last_pid: 最后一个pid值
     if (++ last_pid >= MAX_PID) {
         last_pid = 1;
         goto inside;
@@ -151,18 +151,18 @@ get_pid(void) {
     repeat:
         le = list;
         while ((le = list_next(le)) != list) {
-            proc = le2proc(le, list_link);
+            proc = le2proc(le, list_link);// 获取进程控制块
             if (proc->pid == last_pid) {
                 if (++ last_pid >= next_safe) {
                     if (last_pid >= MAX_PID) {
                         last_pid = 1;
                     }
-                    next_safe = MAX_PID;
+                    next_safe = MAX_PID;// 重新设置 next_safe
                     goto repeat;
                 }
             }
             else if (proc->pid > last_pid && next_safe > proc->pid) {
-                next_safe = proc->pid;
+                next_safe = proc->pid;// 重新设置 next_safe
             }
         }
     }
@@ -235,7 +235,7 @@ kernel_thread(int (*fn)(void *), void *arg, uint32_t clone_flags) {
     memset(&tf, 0, sizeof(struct trapframe));
     tf.gpr.s0 = (uintptr_t)fn;
     tf.gpr.s1 = (uintptr_t)arg;
-    tf.status = (read_csr(sstatus) | SSTATUS_SPP | SSTATUS_SPIE) & ~SSTATUS_SIE;
+    tf.status = (read_csr(sstatus) | SSTATUS_SPP | SSTATUS_SPIE) & ~SSTATUS_SIE;//
     tf.epc = (uintptr_t)kernel_thread_entry;
     return do_fork(clone_flags | CLONE_VM, 0, &tf);
 }
@@ -287,7 +287,7 @@ copy_thread(struct proc_struct *proc, uintptr_t esp, struct trapframe *tf) {
  * @tf:          the trapframe info, which will be copied to child process's proc->tf
  */
 int
-do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
+do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {// 创建子进程
     int ret = -E_NO_FREE_PROC;
     struct proc_struct *proc;
     if (nr_process >= MAX_PROCESS) {
@@ -399,7 +399,7 @@ proc_init(void) {
     idleproc->pid = 0;
     idleproc->state = PROC_RUNNABLE;
     idleproc->kstack = (uintptr_t)bootstack;
-    idleproc->need_resched = 1;
+    idleproc->need_resched = 1;//
     set_proc_name(idleproc, "idle");
     nr_process ++;
 

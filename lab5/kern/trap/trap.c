@@ -191,6 +191,7 @@ void exception_handler(struct trapframe *tf) {
             cprintf("Breakpoint\n");
             if(tf->gpr.a7 == 10){
                 tf->epc += 4;
+                cprintf("activate syscall\n");
                 syscall();
                 kernel_execve_ret(tf,current->kstack+KSTACKSIZE);
             }

@@ -11,14 +11,14 @@ wakeup_proc(struct proc_struct *proc) {
 }
 
 void
-schedule(void) {
-    bool intr_flag;
+schedule(void) {// 1. 保存当前进程的上下文环境
+    bool intr_flag;// 2. 关中断 
     list_entry_t *le, *last;
     struct proc_struct *next = NULL;
     local_intr_save(intr_flag);
     {
         current->need_resched = 0;
-        last = (current == idleproc) ? &proc_list : &(current->list_link);
+        last = (current == idleproc) ? &proc_list : &(current->list_link);// 3. 从当前进程的下一个进程开始遍历，找到第一个处于可运行状态的进程
         le = last;
         do {
             if ((le = list_next(le)) != &proc_list) {

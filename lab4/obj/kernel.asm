@@ -1,5 +1,5 @@
 
-bin/kernel:     file format elf64-littleriscv
+bin/kernel：     文件格式 elf64-littleriscv
 
 
 Disassembly of section .text:
@@ -8040,8 +8040,8 @@ ffffffffc02041da:	9402                	jalr	s0
 ffffffffc02041dc:	46a000ef          	jal	ra,ffffffffc0204646 <do_exit>
 
 ffffffffc02041e0 <alloc_proc>:
-void forkrets(struct trapframe *tf);
-void switch_to(struct context *from, struct context *to);
+void forkrets(struct trapframe *tf);// 从内核线程返回用户态的函数
+void switch_to(struct context *from, struct context *to);// 进程上下文切换函数
 
 // alloc_proc - alloc a proc_struct and init all fields of proc_struct
 static struct proc_struct *
@@ -8361,14 +8361,14 @@ ffffffffc02043c6:	0141                	addi	sp,sp,16
 ffffffffc02043c8:	8082                	ret
 
 ffffffffc02043ca <do_fork>:
-do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
+do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {// 创建子进程
 ffffffffc02043ca:	7179                	addi	sp,sp,-48
 ffffffffc02043cc:	e84a                	sd	s2,16(sp)
     if (nr_process >= MAX_PROCESS) {
 ffffffffc02043ce:	00011917          	auipc	s2,0x11
 ffffffffc02043d2:	0f290913          	addi	s2,s2,242 # ffffffffc02154c0 <nr_process>
 ffffffffc02043d6:	00092703          	lw	a4,0(s2)
-do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
+do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {// 创建子进程
 ffffffffc02043da:	f406                	sd	ra,40(sp)
 ffffffffc02043dc:	f022                	sd	s0,32(sp)
 ffffffffc02043de:	ec26                	sd	s1,24(sp)
@@ -8642,7 +8642,7 @@ ffffffffc020460e:	049000ef          	jal	ra,ffffffffc0204e56 <memset>
 ffffffffc0204612:	e0ca                	sd	s2,64(sp)
     tf.gpr.s1 = (uintptr_t)arg;
 ffffffffc0204614:	e4a6                	sd	s1,72(sp)
-    tf.status = (read_csr(sstatus) | SSTATUS_SPP | SSTATUS_SPIE) & ~SSTATUS_SIE;
+    tf.status = (read_csr(sstatus) | SSTATUS_SPP | SSTATUS_SPIE) & ~SSTATUS_SIE;//
 ffffffffc0204616:	100027f3          	csrr	a5,sstatus
 ffffffffc020461a:	edd7f793          	andi	a5,a5,-291
 ffffffffc020461e:	1207e793          	ori	a5,a5,288
@@ -8779,7 +8779,7 @@ ffffffffc020470e:	e398                	sd	a4,0(a5)
 ffffffffc0204710:	00003717          	auipc	a4,0x3
 ffffffffc0204714:	8f070713          	addi	a4,a4,-1808 # ffffffffc0207000 <bootstack>
 ffffffffc0204718:	eb98                	sd	a4,16(a5)
-    idleproc->need_resched = 1;
+    idleproc->need_resched = 1;//
 ffffffffc020471a:	4705                	li	a4,1
 ffffffffc020471c:	cf98                	sw	a4,24(a5)
     set_proc_name(idleproc, "idle");
@@ -9035,7 +9035,7 @@ ffffffffc020490e <schedule>:
 }
 
 void
-schedule(void) {
+schedule(void) {// 1. 保存当前进程的上下文环境
 ffffffffc020490e:	1141                	addi	sp,sp,-16
 ffffffffc0204910:	e406                	sd	ra,8(sp)
 ffffffffc0204912:	e022                	sd	s0,0(sp)
@@ -9044,7 +9044,7 @@ ffffffffc0204914:	100027f3          	csrr	a5,sstatus
 ffffffffc0204918:	8b89                	andi	a5,a5,2
 ffffffffc020491a:	4401                	li	s0,0
 ffffffffc020491c:	e3d1                	bnez	a5,ffffffffc02049a0 <schedule+0x92>
-    bool intr_flag;
+    bool intr_flag;// 2. 关中断 
     list_entry_t *le, *last;
     struct proc_struct *next = NULL;
     local_intr_save(intr_flag);
@@ -9053,13 +9053,13 @@ ffffffffc020491c:	e3d1                	bnez	a5,ffffffffc02049a0 <schedule+0x92>
 ffffffffc020491e:	00011797          	auipc	a5,0x11
 ffffffffc0204922:	b8a78793          	addi	a5,a5,-1142 # ffffffffc02154a8 <current>
 ffffffffc0204926:	0007b883          	ld	a7,0(a5)
-        last = (current == idleproc) ? &proc_list : &(current->list_link);
+        last = (current == idleproc) ? &proc_list : &(current->list_link);// 3. 从当前进程的下一个进程开始遍历，找到第一个处于可运行状态的进程
 ffffffffc020492a:	00011797          	auipc	a5,0x11
 ffffffffc020492e:	b8678793          	addi	a5,a5,-1146 # ffffffffc02154b0 <idleproc>
 ffffffffc0204932:	6388                	ld	a0,0(a5)
         current->need_resched = 0;
 ffffffffc0204934:	0008ac23          	sw	zero,24(a7) # 2018 <BASE_ADDRESS-0xffffffffc01fdfe8>
-        last = (current == idleproc) ? &proc_list : &(current->list_link);
+        last = (current == idleproc) ? &proc_list : &(current->list_link);// 3. 从当前进程的下一个进程开始遍历，找到第一个处于可运行状态的进程
 ffffffffc0204938:	04a88e63          	beq	a7,a0,ffffffffc0204994 <schedule+0x86>
 ffffffffc020493c:	0c888693          	addi	a3,a7,200
 ffffffffc0204940:	00011617          	auipc	a2,0x11
@@ -9122,7 +9122,7 @@ ffffffffc020498c:	60a2                	ld	ra,8(sp)
 ffffffffc020498e:	0141                	addi	sp,sp,16
         intr_enable();
 ffffffffc0204990:	c43fb06f          	j	ffffffffc02005d2 <intr_enable>
-        last = (current == idleproc) ? &proc_list : &(current->list_link);
+        last = (current == idleproc) ? &proc_list : &(current->list_link);// 3. 从当前进程的下一个进程开始遍历，找到第一个处于可运行状态的进程
 ffffffffc0204994:	00011617          	auipc	a2,0x11
 ffffffffc0204998:	c5460613          	addi	a2,a2,-940 # ffffffffc02155e8 <proc_list>
 ffffffffc020499c:	86b2                	mv	a3,a2
