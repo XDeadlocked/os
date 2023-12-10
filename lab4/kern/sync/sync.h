@@ -20,9 +20,9 @@ static inline void __intr_restore(bool flag) {
 }
 
 #define local_intr_save(x) \
-    do {                   \
+    do {                   \    
         x = __intr_save(); \
     } while (0)
-#define local_intr_restore(x) __intr_restore(x);
+#define local_intr_restore(x) __intr_restore(x);// 保存中断状态，然后关中断
 
 #endif /* !__KERN_SYNC_SYNC_H__ */

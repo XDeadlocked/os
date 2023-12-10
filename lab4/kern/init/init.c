@@ -14,7 +14,7 @@
 #include <proc.h>
 #include <kmonitor.h>
 
-int kern_init(void) __attribute__((noreturn));
+int kern_init(void) __attribute__((noreturn));//
 void grade_backtrace(void);
 
 int
