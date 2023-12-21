@@ -309,8 +309,7 @@ setup_kstack(struct proc_struct *proc) {
     if (page != NULL) {
         proc->kstack = (uintptr_t)page2kva(page);
         return 0;
-    }
-    return -E_NO_MEM;
+    }LAB4E_NO_MEM;
 }
 
 // put_kstack - free the memory space of process kernel stack

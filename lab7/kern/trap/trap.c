@@ -148,7 +148,7 @@ void interrupt_handler(struct trapframe *tf) {
             // clear_csr(sip, SIP_STIP);
             clock_set_next_event();
             ++ticks;
-            run_timer_list();
+            run_timer_list();//lab7
             break;
         case IRQ_H_TIMER:
             cprintf("Hypervisor software interrupt\n");
@@ -232,6 +232,10 @@ void exception_handler(struct trapframe *tf) {
             break;
         case CAUSE_FETCH_PAGE_FAULT:
             cprintf("Instruction page fault\n");
+            if ((ret = pgfault_handler(tf)) != 0) {
+                print_trapframe(tf);
+                panic("handle pgfault failed. %e\n", ret);
+            }
             break;
         case CAUSE_LOAD_PAGE_FAULT:
             cprintf("Load page fault\n");
