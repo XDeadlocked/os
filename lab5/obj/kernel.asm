@@ -6159,7 +6159,7 @@ int copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end, bool shar
 ffffffffc02030f6:	7119                	addi	sp,sp,-128
 ffffffffc02030f8:	e0da                	sd	s6,64(sp)
 ffffffffc02030fa:	8b2a                	mv	s6,a0
-    cprintf("\ncopy on write activated");
+    cprintf("\ncopy on write activated\n");
 ffffffffc02030fc:	00004517          	auipc	a0,0x4
 ffffffffc0203100:	58c50513          	addi	a0,a0,1420 # ffffffffc0207688 <default_pmm_manager+0x140>
 int copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end, bool share) {
@@ -6179,7 +6179,7 @@ ffffffffc020311c:	f862                	sd	s8,48(sp)
 ffffffffc020311e:	f466                	sd	s9,40(sp)
 ffffffffc0203120:	f06a                	sd	s10,32(sp)
 ffffffffc0203122:	84ae                	mv	s1,a1
-    cprintf("\ncopy on write activated");
+    cprintf("\ncopy on write activated\n");
 ffffffffc0203124:	86afd0ef          	jal	ra,ffffffffc020018e <cprintf>
     assert(start % PGSIZE == 0 && end % PGSIZE == 0);
 ffffffffc0203128:	012de733          	or	a4,s11,s2

@@ -151,7 +151,7 @@ void interrupt_handler(struct trapframe *tf) {
                 //print_ticks()
             }
             if (current){
-                sched_class_proc_tick(current); 
+                sched_class_proc_tick(current); //call sched_class_proc_tick
             }
             break;
         case IRQ_H_TIMER:

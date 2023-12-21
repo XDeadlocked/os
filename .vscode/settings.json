@@ -1,6 +1,7 @@
 {
     "files.associations": {
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "default_sched.h": "c"
     },
     "cmake.sourceDirectory": "/home/xc/Desktop/os/riscv64-ucore-labcodes/lab8"
 }

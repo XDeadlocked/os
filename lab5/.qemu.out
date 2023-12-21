@@ -23,7 +23,7 @@ PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
 
 Special kernel symbols:
   entry  0xc0200036 (virtual)
-  etext  0xc020663e (virtual)
+  etext  0xc02067f6 (virtual)
   edata  0xc02a10f8 (virtual)
   end    0xc02ac680 (virtual)
 Kernel executable memory footprint: 690KB
@@ -99,6 +99,294 @@ check_swap() succeeded!
 kernel_execve: pid = 2, name = "forktest".
 Breakpoint
 activate syscall
+
+copy on write activated
+alloc a new page 0xc04c2000
+alloc a new page 0xc04c3000
+alloc a new page 0xc04c4000
+alloc a new page 0xc04c5000
+
+copy on write activated
+alloc a new page 0xc04c8000
+
+copy on write activated
+alloc a new page 0xc04ce000
+alloc a new page 0xc04cf000
+alloc a new page 0xc04d0000
+alloc a new page 0xc04d1000
+
+copy on write activated
+alloc a new page 0xc04d4000
+
+copy on write activated
+alloc a new page 0xc04da000
+alloc a new page 0xc04db000
+alloc a new page 0xc04dc000
+alloc a new page 0xc04dd000
+
+copy on write activated
+alloc a new page 0xc04e0000
+
+copy on write activated
+alloc a new page 0xc04e6000
+alloc a new page 0xc04e7000
+alloc a new page 0xc04e8000
+alloc a new page 0xc04e9000
+
+copy on write activated
+alloc a new page 0xc04ec000
+
+copy on write activated
+alloc a new page 0xc04f2000
+alloc a new page 0xc04f3000
+alloc a new page 0xc04f4000
+alloc a new page 0xc04f5000
+
+copy on write activated
+alloc a new page 0xc04f8000
+
+copy on write activated
+alloc a new page 0xc04fe000
+alloc a new page 0xc04ff000
+alloc a new page 0xc0500000
+alloc a new page 0xc0501000
+
+copy on write activated
+alloc a new page 0xc0504000
+
+copy on write activated
+alloc a new page 0xc050a000
+alloc a new page 0xc050b000
+alloc a new page 0xc050c000
+alloc a new page 0xc050d000
+
+copy on write activated
+alloc a new page 0xc0510000
+
+copy on write activated
+alloc a new page 0xc0516000
+alloc a new page 0xc0517000
+alloc a new page 0xc0518000
+alloc a new page 0xc0519000
+
+copy on write activated
+alloc a new page 0xc051c000
+
+copy on write activated
+alloc a new page 0xc0522000
+alloc a new page 0xc0523000
+alloc a new page 0xc0524000
+alloc a new page 0xc0525000
+
+copy on write activated
+alloc a new page 0xc0528000
+
+copy on write activated
+alloc a new page 0xc052e000
+alloc a new page 0xc052f000
+alloc a new page 0xc0530000
+alloc a new page 0xc0531000
+
+copy on write activated
+alloc a new page 0xc0534000
+
+copy on write activated
+alloc a new page 0xc053a000
+alloc a new page 0xc053b000
+alloc a new page 0xc053c000
+alloc a new page 0xc053d000
+
+copy on write activated
+alloc a new page 0xc0540000
+
+copy on write activated
+alloc a new page 0xc0546000
+alloc a new page 0xc0547000
+alloc a new page 0xc0548000
+alloc a new page 0xc0549000
+
+copy on write activated
+alloc a new page 0xc054c000
+
+copy on write activated
+alloc a new page 0xc0552000
+alloc a new page 0xc0553000
+alloc a new page 0xc0554000
+alloc a new page 0xc0555000
+
+copy on write activated
+alloc a new page 0xc0558000
+
+copy on write activated
+alloc a new page 0xc055e000
+alloc a new page 0xc055f000
+alloc a new page 0xc0560000
+alloc a new page 0xc0561000
+
+copy on write activated
+alloc a new page 0xc0564000
+
+copy on write activated
+alloc a new page 0xc056b000
+alloc a new page 0xc056c000
+alloc a new page 0xc056d000
+alloc a new page 0xc056e000
+
+copy on write activated
+alloc a new page 0xc0571000
+
+copy on write activated
+alloc a new page 0xc0577000
+alloc a new page 0xc0578000
+alloc a new page 0xc0579000
+alloc a new page 0xc057a000
+
+copy on write activated
+alloc a new page 0xc057d000
+
+copy on write activated
+alloc a new page 0xc0583000
+alloc a new page 0xc0584000
+alloc a new page 0xc0585000
+alloc a new page 0xc0586000
+
+copy on write activated
+alloc a new page 0xc0589000
+
+copy on write activated
+alloc a new page 0xc058f000
+alloc a new page 0xc0590000
+alloc a new page 0xc0591000
+alloc a new page 0xc0592000
+
+copy on write activated
+alloc a new page 0xc0595000
+
+copy on write activated
+alloc a new page 0xc059b000
+alloc a new page 0xc059c000
+alloc a new page 0xc059d000
+alloc a new page 0xc059e000
+
+copy on write activated
+alloc a new page 0xc05a1000
+
+copy on write activated
+alloc a new page 0xc05a7000
+alloc a new page 0xc05a8000
+alloc a new page 0xc05a9000
+alloc a new page 0xc05aa000
+
+copy on write activated
+alloc a new page 0xc05ad000
+
+copy on write activated
+alloc a new page 0xc05b3000
+alloc a new page 0xc05b4000
+alloc a new page 0xc05b5000
+alloc a new page 0xc05b6000
+
+copy on write activated
+alloc a new page 0xc05b9000
+
+copy on write activated
+alloc a new page 0xc05bf000
+alloc a new page 0xc05c0000
+alloc a new page 0xc05c1000
+alloc a new page 0xc05c2000
+
+copy on write activated
+alloc a new page 0xc05c5000
+
+copy on write activated
+alloc a new page 0xc05cc000
+alloc a new page 0xc05cd000
+alloc a new page 0xc05ce000
+alloc a new page 0xc05cf000
+
+copy on write activated
+alloc a new page 0xc05d2000
+
+copy on write activated
+alloc a new page 0xc05d8000
+alloc a new page 0xc05d9000
+alloc a new page 0xc05da000
+alloc a new page 0xc05db000
+
+copy on write activated
+alloc a new page 0xc05de000
+
+copy on write activated
+alloc a new page 0xc05e4000
+alloc a new page 0xc05e5000
+alloc a new page 0xc05e6000
+alloc a new page 0xc05e7000
+
+copy on write activated
+alloc a new page 0xc05ea000
+
+copy on write activated
+alloc a new page 0xc05f0000
+alloc a new page 0xc05f1000
+alloc a new page 0xc05f2000
+alloc a new page 0xc05f3000
+
+copy on write activated
+alloc a new page 0xc05f6000
+
+copy on write activated
+alloc a new page 0xc05fc000
+alloc a new page 0xc05fd000
+alloc a new page 0xc05fe000
+alloc a new page 0xc05ff000
+
+copy on write activated
+alloc a new page 0xc0602000
+
+copy on write activated
+alloc a new page 0xc0608000
+alloc a new page 0xc0609000
+alloc a new page 0xc060a000
+alloc a new page 0xc060b000
+
+copy on write activated
+alloc a new page 0xc060e000
+
+copy on write activated
+alloc a new page 0xc0614000
+alloc a new page 0xc0615000
+alloc a new page 0xc0616000
+alloc a new page 0xc0617000
+
+copy on write activated
+alloc a new page 0xc061a000
+
+copy on write activated
+alloc a new page 0xc0620000
+alloc a new page 0xc0621000
+alloc a new page 0xc0622000
+alloc a new page 0xc0623000
+
+copy on write activated
+alloc a new page 0xc0626000
+
+copy on write activated
+alloc a new page 0xc062d000
+alloc a new page 0xc062e000
+alloc a new page 0xc062f000
+alloc a new page 0xc0630000
+
+copy on write activated
+alloc a new page 0xc0633000
+
+copy on write activated
+alloc a new page 0xc0639000
+alloc a new page 0xc063a000
+alloc a new page 0xc063b000
+alloc a new page 0xc063c000
+
+copy on write activated
+alloc a new page 0xc063f000
 I am child 31
 I am child 30
 I am child 29

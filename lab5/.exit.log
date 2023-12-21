@@ -23,7 +23,7 @@ PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
 
 Special kernel symbols:
   entry  0xc0200036 (virtual)
-  etext  0xc020663e (virtual)
+  etext  0xc02067f6 (virtual)
   edata  0xc02a10f8 (virtual)
   end    0xc02ac680 (virtual)
 Kernel executable memory footprint: 690KB
@@ -100,6 +100,18 @@ kernel_execve: pid = 2, name = "exit".
 Breakpoint
 activate syscall
 I am the parent. Forking the child...
+
+copy on write activated
+alloc a new page 0xc04c3000
+alloc a new page 0xc04c4000
+alloc a new page 0xc04c5000
+alloc a new page 0xc04c6000
+
+copy on write activated
+alloc a new page 0xc04c9000
+
+copy on write activated
+alloc a new page 0xc04ca000
 I am parent, fork a child pid 3
 I am the parent, waiting now..
 I am the child.
