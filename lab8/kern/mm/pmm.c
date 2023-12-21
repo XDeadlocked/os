@@ -22,6 +22,7 @@ uint_t va_pa_offset;
 // memory starts at 0x80000000 in RISC-V
 const size_t nbase = DRAM_BASE / PGSIZE;
 
+
 // virtual address of boot-time page directory
 pde_t *boot_pgdir = NULL;
 // physical address of boot-time page directory
@@ -490,6 +491,10 @@ int copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end,
              * (3) memory copy from src_kvaddr to dst_kvaddr, size is PGSIZE
              * (4) build the map of phy addr of  nage with the linear addr start
              */
+            uintptr_t src_kvaddr = page2kva(page);
+            uintptr_t dst_kvaddr = page2kva(npage);
+            memcpy(dst_kvaddr, src_kvaddr, PGSIZE);
+            ret = page_insert(to, npage, start, perm);
             assert(ret == 0);
         }
         start += PGSIZE;

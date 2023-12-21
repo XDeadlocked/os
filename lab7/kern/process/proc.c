@@ -680,6 +680,7 @@ load_icode(unsigned char *binary, size_t size) {
     tf->epc = elf->e_entry;
     tf->status = sstatus & ~(SSTATUS_SPP | SSTATUS_SPIE);
     ret = 0;
+    cprintf("1\n");
 out:
     return ret;
 bad_cleanup_mmap:

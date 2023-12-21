@@ -233,6 +233,10 @@ void exception_handler(struct trapframe *tf) {
             break;
         case CAUSE_FETCH_PAGE_FAULT:
             cprintf("Instruction page fault\n");
+            if ((ret = pgfault_handler(tf)) != 0) {
+                print_trapframe(tf);
+                panic("handle pgfault failed. %e\n", ret);
+            }
             break;
         case CAUSE_LOAD_PAGE_FAULT:
             cprintf("Load page fault\n");

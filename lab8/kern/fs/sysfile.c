@@ -46,6 +46,7 @@ sysfile_open(const char *__path, uint32_t open_flags) {
         return ret;
     }
     ret = file_open(path, open_flags);
+    cprintf("file checked %s\n", path);
     kfree(path);
     return ret;
 }
@@ -59,6 +60,7 @@ sysfile_close(int fd) {
 /* sysfile_read - read file */
 int
 sysfile_read(int fd, void *base, size_t len) {
+    cprintf("init read\n");
     struct mm_struct *mm = current->mm;
     if (len == 0) {
         return 0;

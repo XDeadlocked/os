@@ -549,39 +549,48 @@ sfs_close(struct inode *node) {
  * @alenp:    the length need to read (is a pointer). and will RETURN the really Rd/Wr lenght
  * @write:    BOOL, 0 read, 1 write
  */
+/*  
+ * sfs_io_nolock - Rd/Wr a file contentfrom offset position to offset+ length  disk blocks<-->buffer (in memroy)
+ * @sfs:      sfs file system
+ * @sin:      sfs inode in memory
+ * @buf:      the buffer Rd/Wr
+ * @offset:   the offset of file
+ * @alenp:    the length need to read (is a pointer). and will RETURN the really Rd/Wr lenght
+ * @write:    BOOL, 0 read, 1 write
+ */
 static int
 sfs_io_nolock(struct sfs_fs *sfs, struct sfs_inode *sin, void *buf, off_t offset, size_t *alenp, bool write) {
     struct sfs_disk_inode *din = sin->din;
     assert(din->type != SFS_TYPE_DIR);
+  // calculate the Rd/Wr end position
+    // 计算缓冲区读取/写入的终止位置
     off_t endpos = offset + *alenp, blkoff;
     *alenp = 0;
-	// calculate the Rd/Wr end position
-    if (offset < 0 || offset >= SFS_MAX_FILE_SIZE || offset > endpos) {
+    if (offset < 0 || offset >= SFS_MAX_FILE_SIZE || offset > endpos)
         return -E_INVAL;
-    }
+    // 如果偏移与终止位置相同，及欲读取/写入0字节的数据
     if (offset == endpos) {
+        // 直接返回
         return 0;
     }
-    if (endpos > SFS_MAX_FILE_SIZE) {
+    if (endpos > SFS_MAX_FILE_SIZE)
         endpos = SFS_MAX_FILE_SIZE;
-    }
     if (!write) {
+        // 如果是读取数据，并冲区中剩余的数据超出一个硬盘节点的数据大小
         if (offset >= din->size) {
+            // 直接返回，读取失败
             return 0;
         }
-        if (endpos > din->size) {
+        if (endpos > din->size)
             endpos = din->size;
-        }
     }
-
+    // 根据不同的执行函数，设置对应的函数指针
     int (*sfs_buf_op)(struct sfs_fs *sfs, void *buf, size_t len, uint32_t blkno, off_t offset);
     int (*sfs_block_op)(struct sfs_fs *sfs, void *buf, uint32_t blkno, uint32_t nblks);
-    if (write) {
+    if (write)
         sfs_buf_op = sfs_wbuf, sfs_block_op = sfs_wblock;
-    }
-    else {
+    else
         sfs_buf_op = sfs_rbuf, sfs_block_op = sfs_rblock;
-    }
 
     int ret = 0;
     size_t size, alen = 0;
@@ -590,18 +599,49 @@ sfs_io_nolock(struct sfs_fs *sfs, struct sfs_inode *sin, void *buf, off_t offset
     uint32_t nblks = endpos / SFS_BLKSIZE - blkno;  // The size of Rd/Wr blocks
 
   //LAB8:EXERCISE1 YOUR CODE HINT: call sfs_bmap_load_nolock, sfs_rbuf, sfs_rblock,etc. read different kind of blocks in file
-	/*
-	 * (1) If offset isn't aligned with the first block, Rd/Wr some content from offset to the end of the first block
-	 *       NOTICE: useful function: sfs_bmap_load_nolock, sfs_buf_op
-	 *               Rd/Wr size = (nblks != 0) ? (SFS_BLKSIZE - blkoff) : (endpos - offset)
-	 * (2) Rd/Wr aligned blocks 
-	 *       NOTICE: useful function: sfs_bmap_load_nolock, sfs_block_op
+  /*
+   * (1) If offset isn't aligned with the first block, Rd/Wr some content from offset to the end of the first block
+   *       NOTICE: useful function: sfs_bmap_load_nolock, sfs_buf_op
+   *               Rd/Wr size = (nblks != 0) ? (SFS_BLKSIZE - blkoff) : (endpos - offset)
+   * (2) Rd/Wr aligned blocks
+   *       NOTICE: useful function: sfs_bmap_load_nolock, sfs_block_op
      * (3) If end position isn't aligned with the last block, Rd/Wr some content from begin to the (endpos % SFS_BLKSIZE) of the last block
-	 *       NOTICE: useful function: sfs_bmap_load_nolock, sfs_buf_op	
-	*/
-
-    
-
+   *       NOTICE: useful function: sfs_bmap_load_nolock, sfs_buf_op
+  */
+    // 对齐偏移。如果偏移没有对齐第一个基础块，则多读取/写入第一个基础块的末尾数据
+    if ((blkoff = offset % SFS_BLKSIZE) != 0) {
+        size = (nblks != 0) ? (SFS_BLKSIZE - blkoff) : (endpos - offset);
+        // 获取第一个基础块所对应的block的编号`ino`
+        if ((ret = sfs_bmap_load_nolock(sfs, sin, blkno, &ino)) != 0)
+            goto out;
+        // 通过上一步取出的`ino`，读取/写入一部分第一个基础块的末尾数据
+        if ((ret = sfs_buf_op(sfs, buf, size, ino, blkoff)) != 0)
+            goto out;
+        alen += size;
+        if (nblks == 0)
+            goto out;
+        buf += size, blkno ++, nblks --;
+    }
+    // 循环读取/写入对齐好的数据
+    size = SFS_BLKSIZE;
+    while (nblks > 0) {
+        // 获取inode对应的基础块编号
+        if ((ret = sfs_bmap_load_nolock(sfs, sin, blkno, &ino)) != 0)
+            goto out;
+        // 单次读取/写入一基础块的数据
+        if ((ret = sfs_block_op(sfs, buf, ino, 1)) != 0)
+            goto out;
+        alen += size, buf += size, blkno ++, nblks --;
+    }
+    // 如果末尾位置没有与最后一个基础块对齐，则多读取/写入一点末尾基础块的数据
+    size = endpos % SFS_BLKSIZE;
+    if (size != 0) {
+        if ((ret = sfs_bmap_load_nolock(sfs, sin, blkno, &ino)) != 0)
+            goto out;
+        if ((ret = sfs_buf_op(sfs, buf, size, ino, 0)) != 0)
+            goto out;
+        alen += size;
+    }
 out:
     *alenp = alen;
     if (offset + alen > sin->din->size) {
@@ -610,7 +650,6 @@ out:
     }
     return ret;
 }
-
 /*
  * sfs_io - Rd/Wr file. the wrapper of sfs_io_nolock
             with lock protect

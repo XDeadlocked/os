@@ -8,7 +8,7 @@
 
 /* You should define the BigStride constant here*/
 /* LAB6: YOUR CODE */
-#define BIG_STRIDE   /* you should give a value, and is ??? */
+#define BIG_STRIDE ((uint32_t) -1) /* you should give a value, and is ??? */
 
 /* The compare function for two skew_heap_node_t's and the
  * corresponding procs*/
@@ -144,7 +144,7 @@ stride_proc_tick(struct run_queue *rq, struct proc_struct *proc) {
      }
 }
 
-struct sched_class default_sched_class = {
+struct sched_class s_sched_class = {
      .name = "stride_scheduler",
      .init = stride_init,
      .enqueue = stride_enqueue,
